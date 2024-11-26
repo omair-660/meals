@@ -1,24 +1,30 @@
-import axios from 'axios';
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 export default function Search() {
-  const [searchType, setSearchType] = useState('name'); 
-  const [query, setQuery] = useState(''); 
-  const [meals, setMeals] = useState([]); 
+  const [searchType, setSearchType] = useState('name');
+  const [query, setQuery] = useState('');
+  const [meals, setMeals] = useState([]);
+  const [loading, setLoading] = useState(false);  // Added loading state
 
   function searchMeals() {
+    setLoading(true);  // Set loading to true when fetching data
     const url =
       searchType === 'name'
         ? `https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`
-        : `https://www.themealdb.com/api/json/v1/1/search.php?f=${query.charAt(0)}`; 
+        : `https://www.themealdb.com/api/json/v1/1/search.php?f=${query.charAt(0)}`;
 
     axios
       .get(url)
       .then((res) => {
-        setMeals(res.data.meals || []); 
+        setMeals(res.data.meals || []);
+        setLoading(false);  // Set loading to false when data is fetched
       })
-      .catch((error) => console.error('Error fetching data:', error));
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setLoading(false);  // Set loading to false on error
+      });
   }
 
   return (
@@ -36,13 +42,11 @@ export default function Search() {
 
           <input
             type="search"
-            placeholder={
-                searchType === 'name' ? 'Search by meal name' : 'Enter a letter'
-            }
+            placeholder={searchType === 'name' ? 'Search by meal name' : 'Enter a letter'}
             value={query}
             required
             onChange={(e) => setQuery(e.target.value)}
-            className=" border-none rounded p-2 flex-grow outline-none"
+            className="border-none rounded p-2 flex-grow outline-none"
           />
 
           <button
@@ -53,20 +57,21 @@ export default function Search() {
           </button>
         </div>
 
-
-        {meals.length > 0 ? (
+        {loading ? (
+          <div className="mt-4 text-gray-200">Loading...</div>  // Show loading text
+        ) : meals.length > 0 ? (
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {meals.map((meal) => (
               <div key={meal.idMeal} className="p-4 border border-[#6d501a] rounded shadow text-white">
-              <Link to={`/mealsDetails/${meal.idMeal}`}>
-              <h2 className="text-xl font-bold">{meal.strMeal}</h2>
-                <img
-                  src={meal.strMealThumb}
-                  alt={meal.strMeal}
-                  className="w-full h-auto rounded mt-2"
-                />
-                <p className="mt-2">{meal.strInstructions.slice(0, 100)}...</p>
-              </Link>
+                <Link to={`/mealsDetails/${meal.idMeal}`}>
+                  <h2 className="text-xl font-bold">{meal.strMeal}</h2>
+                  <img
+                    src={meal.strMealThumb}
+                    alt={meal.strMeal}
+                    className="w-full h-auto rounded mt-2"
+                  />
+                  <p className="mt-2">{meal.strInstructions.slice(0, 100)}...</p>
+                </Link>
               </div>
             ))}
           </div>
