@@ -30,7 +30,7 @@ export default function Search() {
   return (
     <section>
       <div className="container">
-        <div className="flex items-center w-1/2">
+        <div className="flex items-center w-1/2 flex-wrap gap-3">
           <select
             value={searchType}
             onChange={(e) => setSearchType(e.target.value)}
